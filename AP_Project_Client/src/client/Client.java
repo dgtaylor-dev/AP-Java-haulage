@@ -4,57 +4,49 @@ package client;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
+
 import models.Staff;
 
-public class Client {
+public class Client implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Socket socket;
+	private ObjectOutputStream outputStream;
+	private ObjectInputStream inputStream;
+	
+	private String request = "";
 	
 	
-	private Socket socket = null;
-	private ObjectOutputStream outputStream = null;
-	private ObjectInputStream inputStream = null;
+	Scanner scanner = new Scanner(System.in);
 	
 
 	
 	public Client() {
-		createSockeInstance();
-		configureStreams();
-	}
-
-//	create socket instance
-	private void createSockeInstance() {
-		
+//		create a  new socket instance
 		try {
 			socket = new Socket("127.0.0.1", 9999);
 			
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	
-//	configure input and output streams for the socket created
-	private void configureStreams() {
-		
-		try {
-//			for sending data to the server
+//			configure the input and output streams
 			outputStream = new ObjectOutputStream(socket.getOutputStream());
-			
-//			for receiving data from server
 			inputStream = new ObjectInputStream(socket.getInputStream());
 			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
+
 	
 //	close connection
 	public  void closeConnection() {
@@ -71,24 +63,26 @@ public class Client {
 	}
 	
 	
-//	Send requests to server
 	public void sendRequestToServer() {
-		
-		Scanner scanner = new Scanner(System.in);
-	
 		try {
 			
 			System.out.println("Write request: ");
-			String msgToSend = scanner.nextLine();
-				
-			outputStream.writeObject(msgToSend);
+			request = scanner.nextLine();
+			
+			outputStream.writeObject(request);
 			outputStream.flush();
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			
+		}finally {
 			scanner.close();
+		}
 	}
+	
+	
+	
+	
 	
 	public void registerStaff(Staff staff) {
 		
@@ -97,9 +91,21 @@ public class Client {
 			outputStream.flush();
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+//	
+	public void getStaffById(int adminId) {
+		
+		try {
+			outputStream.writeObject(adminId);
+			outputStream.flush();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 //	receive responses from server
@@ -107,17 +113,28 @@ public class Client {
 		
 		try 
 		{
-//			String serverResponse = (String) inputStream.readObject();
-//			System.out.println(serverResponse);
-			
-			Boolean flag = (Boolean) inputStream.readObject();
-			if(flag == true) {
-				System.out.println("User added successfully");
+//			response from server which determines whether or not admin was registered successfully;
+			if(request.equalsIgnoreCase("add admin")){
+				
+				Boolean flag = (Boolean) inputStream.readObject();
+				if(flag == true) {
+					System.out.println("Admin registered successfully"); 
+				}
+				else {
+					System.out.println("There was a problem adding user");
+				}
+				
+			}
+//			retrieve admin from database for the purpose of logging in
+			else if(request.equalsIgnoreCase("get admin")){
+				
+				int staffIdNum = (int) inputStream.readObject();
+				System.out.println("Found ID: " + staffIdNum);
+				
 			}
 			else {
-				System.out.println("There was a problem adding user");
+				return;
 			}
-			
 			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block

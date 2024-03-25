@@ -18,7 +18,7 @@ public class Staff implements Serializable{
 	private String email;
 	private String position;
 	private String status;
-//	private int tripsDone;
+
 	
 	
 	
@@ -35,7 +35,8 @@ public class Staff implements Serializable{
 		this.email = "";
 		this.position = "";
 		this.status = "";
-//		this.tripsDone = 0;
+		
+
 	}
 	
 

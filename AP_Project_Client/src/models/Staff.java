@@ -17,7 +17,7 @@ public class Staff implements Serializable{
 	private String email;
 	private String position;
 	private String status;
-	private int tripsDone;
+
 	
 	
 	
@@ -32,7 +32,7 @@ public class Staff implements Serializable{
 		this.email = "";
 		this.position = "";
 		this.status = "";
-//		this.tripsDone = 0;
+
 	}
 	
 	public Staff(String firstName, String lastName, Date dob, String address, String phone, String email, String position, String status) 
@@ -47,7 +47,7 @@ public class Staff implements Serializable{
 		this.email = email;
 		this.position = position;
 		this.status = status;
-//		this.tripsDone = 0;
+
 	}
 
 	
@@ -155,7 +155,7 @@ public class Staff implements Serializable{
 	public String toString() {
 		return "Staff [firstName=" + firstName + ", lastName=" + lastName + ", dob=" + dob + ", address="
 				+ address + ", phoneNum=" + phoneNum + ", email=" + email + ", position=" + position + ", status="
-				+ status + ", tripsDone=" + tripsDone + "]";
+				+ status + "]";
 	}
 
 	
