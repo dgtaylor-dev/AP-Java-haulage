@@ -12,13 +12,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+import models.Customer;
+import models.RouteRate;
 import models.Staff;
 
 public class Server {
 	
 	private ServerSocket serverSocket;
-	private Socket socket = null;
+	private Socket socket;
+	@SuppressWarnings("unused")
 	private ObjectOutputStream outputStream;
+	@SuppressWarnings("unused")
 	private ObjectInputStream inputStream;
 	private Connection dbConnection;
 	private Statement sqlStatement;
@@ -100,18 +104,38 @@ public class Server {
 			
 			String req = "";
 			try {
+				
 				req = (String) inputStream.readObject();
 				System.out.println(req);
 				
+//				reads staff Object sent from client
 				if(req.equalsIgnoreCase("add admin")) {
-					Staff staff = (Staff) inputStream.readObject();
-					registerStaff(staff);
+					Staff staffToAdd = (Staff) inputStream.readObject();
+					registerStaff(staffToAdd, outputStream);
 				}
 				
+//				reads admin ID sent from the client
 				if(req.equalsIgnoreCase("get admin")) {
 					int staffId = (int) inputStream.readObject();
-					getStaffById(staffId);
-					
+					getStaffById(staffId, outputStream);
+				}
+				
+//				reads customer Object sent from client
+				if(req.equalsIgnoreCase("add customer")) {
+					Customer customerToAdd = (Customer) inputStream.readObject();
+					addCustomer(customerToAdd, outputStream);
+				}
+				
+//				reads route/rate object from client
+				if(req.equalsIgnoreCase("add route")) {
+					RouteRate routeRate = (RouteRate) inputStream.readObject();
+					addRouteRate(routeRate, outputStream);
+				}
+	
+//				reads String for search criteria to search route or rate
+				if(req.equalsIgnoreCase("get route")) {
+					String key = (String) inputStream.readObject();
+					getRouteRate(key, outputStream);
 				}
 				
 				
@@ -126,40 +150,39 @@ public class Server {
 		}
 		
 		
-//		register admin
-		@SuppressWarnings("unused")
-		private void registerStaff (Staff staff) {		
+//		register 		
+		private void registerStaff (Staff staff, ObjectOutputStream optStream) {		
 			
-		try {
-				
-		        String sql = "INSERT INTO java_hlg_db.staff(first_name, last_name, address, phone, email, position, status_) " +
-		        "VALUES ('" + staff.getFirstName() + "', '" + staff.getLastName() + "', '" + staff.getAddress() 
-		        + "', '" + staff.getPhoneNum() + "', '" + staff.getEmail() + "', '" +staff.getPosition() 
-		        + "', '" + staff.getStatus() + "')";
+			try {
+					
+			        String sql = "INSERT INTO java_hlg_db.staff(first_name, last_name, address, phone, email, position, status_) " +
+			        "VALUES ('" + staff.getFirstName() + "', '" + staff.getLastName() + "', '" + staff.getAddress() 
+			        + "', '" + staff.getPhoneNum() + "', '" + staff.getEmail() + "', '" +staff.getPosition() 
+			        + "', '" + staff.getStatus() + "')";
 
-		        sqlStatement = dbConnection.createStatement();
-		        int status = sqlStatement.executeUpdate(sql);
+			        sqlStatement = dbConnection.createStatement();
+			        int status = sqlStatement.executeUpdate(sql);
 
-		        if (status == 1) {
-		            outputStream.writeObject(true);
-//		            outputStream.flush();
-		            
-		        } else {
-		            outputStream.writeObject(false);
-//		            outputStream.flush();
-		        }
-			
-			}catch (SQLException e) {
-				e.printStackTrace();
+			        if (status == 1) {
+			            outputStream.writeObject(true);
+			            outputStream.flush();
+			            
+			        } else {
+			            outputStream.writeObject(false);
+			            outputStream.flush();
+			        }
 				
-			} catch (IOException e) {
-				e.printStackTrace();
+				}catch (SQLException e) {
+					e.printStackTrace();
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
 			}
-			
-		}
 		
-		
-		private  void getStaffById(int staffId) {
+//		get staff by id
+		private  void getStaffById(int staffId, ObjectOutputStream optStream) {
 			
 			String sql = "SELECT * FROM java_hlg_db.staff WHERE staff_id = " + staffId ;
 			
@@ -185,8 +208,111 @@ public class Server {
 				e.printStackTrace();
 			}
 		}
+			
 		
 		
+//		add customer
+		@SuppressWarnings("unused")
+		private void addCustomer(Customer cust,  ObjectOutputStream optStream) {		
+			
+			try {
+					
+			        String sql = "INSERT INTO java_hlg_db.customers(company_name, cont_person, address1, "
+			        		     + "address2, po, parish, phone, email, status_) " +
+			        "VALUES ('" + cust.getCompany()+ "', '" + cust.getContactPerson() + "', '" + cust.getAddress1() 
+			        + "', '" + cust.getAddress2() + "', '" + cust.getPo() + "', '" +cust.getParish()
+			        + "', '" + cust.getPhone() + "', '" + cust.getEmail() + "', '" + cust.getStatus() + "')";
+
+			        sqlStatement = dbConnection.createStatement();
+			        int status = sqlStatement.executeUpdate(sql);
+
+			        if (status == 1) {
+			            outputStream.writeObject(true);
+			            outputStream.flush();
+			             
+			        } else {
+			            outputStream.writeObject(false);
+			            outputStream.flush();
+			        }
+				
+				}catch (SQLException e) {
+					e.printStackTrace();
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		
+		
+		
+		
+		
+//		add Routes and rates
+		private void addRouteRate(RouteRate routeRate, ObjectOutputStream optStream) {		
+			
+			try {
+					
+			        String sql = "INSERT INTO java_hlg_db.route_rates(route_name, source_, destination, rate)" +
+			        "VALUES ('" + routeRate.getRouteName()+"', '" + routeRate.getSource()+ "', '" 
+			        		+ routeRate.getDestination() + "', '" + routeRate.getRate() + "')";
+
+			        sqlStatement = dbConnection.createStatement();
+			        int status = sqlStatement.executeUpdate(sql);
+
+			        if (status == 1) {
+			            outputStream.writeObject(true);
+			            outputStream.flush();
+			             
+			        } else {
+			            outputStream.writeObject(false);
+			            outputStream.flush();
+			        }
+				
+				}catch (SQLException e) {
+					e.printStackTrace();
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		
+		
+		
+//		get routes and rates
+//		get staff by id
+		private  void getRouteRate(String key, ObjectOutputStream optStream) {
+			
+			RouteRate routeRate = new RouteRate();
+			
+			 String sql = "SELECT * FROM java_hlg_db.route_rates WHERE route_name LIKE '%"  + key 
+					 + "%' OR source_ LIKE '%" + key + "%' OR destination LIKE '%" + key + "%'";
+			
+			try {
+				sqlStatement = dbConnection.createStatement();
+				ResultSet result = sqlStatement.executeQuery(sql);
+				
+				if(result.next()) {
+					routeRate.setRouteId(result.getInt("route_id"));
+					routeRate.setRouteName(result.getString("route_name"));
+					routeRate.setSource(result.getString("source"));
+					routeRate.setDestination(result.getString("destination"));
+					routeRate.setRate(result.getDouble("rate"));
+					
+//					send the result set to the client side
+					outputStream.writeObject(routeRate);
+					outputStream.flush();
+				}
+				else {
+					System.out.println("Could not find route with key: " + key);
+				}
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		
 	}
 	

@@ -38,7 +38,6 @@ public class Staff implements Serializable{
 	public Staff(String firstName, String lastName, Date dob, String address, String phone, String email, String position, String status) 
 	{
 		
-		
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.dob = dob;

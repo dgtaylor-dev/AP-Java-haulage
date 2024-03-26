@@ -9,7 +9,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
-
+import models.Customer;
+import models.RouteRate;
 import models.Staff;
 
 public class Client implements Serializable{
@@ -46,7 +47,6 @@ public class Client implements Serializable{
 		}
 	}
 
-
 	
 //	close connection
 	public  void closeConnection() {
@@ -81,9 +81,6 @@ public class Client implements Serializable{
 	}
 	
 	
-	
-	
-	
 	public void registerStaff(Staff staff) {
 		
 		try {
@@ -108,6 +105,43 @@ public class Client implements Serializable{
 		
 	}
 	
+//	add customer method
+	public void addCustomer(Customer customer) {
+		
+		try {
+			outputStream.writeObject(customer);
+			outputStream.flush();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+//	send route/rate to server
+	public void sendRouteRate(RouteRate routeRate) {
+		try {
+			outputStream.writeObject(routeRate);
+			outputStream.flush();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+//	send route/rate to server
+	public void sendRouteSearchKey(String searchKey) {
+		try {
+			outputStream.writeObject(searchKey);
+			outputStream.flush();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 //	receive responses from server
 	public void recieveServerReponse() {
 		
@@ -126,15 +160,48 @@ public class Client implements Serializable{
 				
 			}
 //			retrieve admin from database for the purpose of logging in
-			else if(request.equalsIgnoreCase("get admin")){
+			if (request.equalsIgnoreCase("get admin")){
 				
 				int staffIdNum = (int) inputStream.readObject();
 				System.out.println("Found ID: " + staffIdNum);
 				
 			}
-			else {
-				return;
+			
+//			receive server response stating if the request to add a customer was met
+			if(request.equalsIgnoreCase("add customer")){
+				
+				Boolean customerAdded = (Boolean) inputStream.readObject();
+				if(customerAdded == true) {
+					System.out.println("customer added successfully"); 
+				}
+				else {
+					System.out.println("Could not add customer");
+				}
+				
 			}
+			
+//			receive server response stating if the request to add a route/rate was met
+			if(request.equalsIgnoreCase("add route")){
+				
+				Boolean routeToAdd = (Boolean) inputStream.readObject();
+				if(routeToAdd == true) {
+					System.out.println("Route/Rates added successfully"); 
+				}
+				else {
+					System.out.println("Could not add Route/Rate");
+				}
+				
+			}
+			
+			
+//			receive searched item response from server
+			if(request.equalsIgnoreCase("get route")){
+				
+				RouteRate route = (RouteRate) inputStream.readObject();
+				System.out.println("Route Found:  " + route);
+				
+			}
+			
 			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block

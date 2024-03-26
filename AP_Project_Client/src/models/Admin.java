@@ -1,26 +1,22 @@
 package models;
 
-
-public class Admin extends Staff{
+public class Admin extends Staff {
 	
-
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String password = "";
-	
+	private String password;
+
 	public Admin() {
-		
+		super();
+		this.password = "";
 	}
 
-	public Admin(String firstName, String lastName, String password, Date dob, String address, String phone, String email,
-			String position, String status) {
-		
+	public Admin(String firstName, String lastName, Date dob, String address, String phone, String email, String position, String status, String password) {
 		super(firstName, lastName, dob, address, phone, email, position, status);
 		this.password = password;
-		
 	}
 
 	public String getPassword() {
@@ -30,10 +26,9 @@ public class Admin extends Staff{
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-
 	
-	
-	
-	
+//	@Override
+//	public String toString() {
+//		return super.toString() + ", password=" + password + "]";
+//	}
 }
